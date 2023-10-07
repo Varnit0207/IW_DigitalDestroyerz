@@ -451,15 +451,18 @@ class Button():
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+        self.border_color = (0, 0, 0)  
+        self.border_width = 2
 
     def draw(self):
         screen.blit(self.image, (self.rect.x, self.rect.y))
+        pygame.draw.rect(screen, self.border_color, self.rect, self.border_width)
 
 start_button = Button(button_x, button_y, start_img)
 
 run = True
 while run:
-    screen.fill((245, 245, 220))
+    screen.fill((210, 180, 140))
 
     heading_text = heading_font.render("Chess Game by Digital Destroyerz", True, (0, 0, 0))
     heading_rect = heading_text.get_rect(center=(gui_width // 2, 100))
