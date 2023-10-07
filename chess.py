@@ -1,12 +1,26 @@
 import pygame
+
 pygame.init()
+
+
 WIDTH = 1000
-HEIGHT =900
+HEIGHT = 850
+
+BOARD_SIZE = min(WIDTH, HEIGHT)
+SQUARE_SIZE = BOARD_SIZE // 8
+
+
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 pygame.display.set_caption("Multiplayer chess game made by Digital Destroyerz")
+
+
+
+
 font = pygame.font.Font('freesansbold.ttf', 20)
 medium_font = pygame.font.Font('freesansbold.ttf', 40)
 big_font = pygame.font.Font('freesansbold.ttf', 50)
+
+
 timer = pygame.time.Clock()
 fps = 60
 white_pieces = ["rook", "knight", "bishop","king","queen","bishop","knight","rook","pawn","pawn","pawn","pawn","pawn","pawn","pawn","pawn"]
@@ -77,13 +91,15 @@ def draw_board():
         pygame.draw.rect(screen, 'gray', [0, 800, WIDTH, 100])
         pygame.draw.rect(screen, 'gold', [0, 800, WIDTH, 100], 5)
         pygame.draw.rect(screen, 'gold', [800, 0, 200, HEIGHT], 5)
-        status_text = ['White: Select a Piece to Move!', 'White: Select a Place!',
-                       'Black: Select a Piece to Move!', 'Black: Select a Place!']
+        status_text = ['White: Select a Piece to Move!', 'White: Select a Destination!',
+                       'Black: Select a Piece to Move!', 'Black: Select a Destination!']
         screen.blit(big_font.render(status_text[turn_step], True, 'black'), (20, 820))
         for i in range(9):
             pygame.draw.line(screen, 'black', (0, 100 * i), (800, 100 * i), 2)
             pygame.draw.line(screen, 'black', (100 * i, 0), (100 * i, 800), 2)
         screen.blit(medium_font.render('FORFEIT', True, 'black'), (810, 830))
+
+
 
 def draw_pieces():
     for i in range(len(white_pieces)):
@@ -96,6 +112,7 @@ def draw_pieces():
             if selection == i:
                 pygame.draw.rect(screen, 'red', [white_locations[i][0] * 100 + 1, white_locations[i][1] * 100 + 1,
                                                  100, 100], 2)
+
     for i in range(len(black_pieces)):
         index = piece_list.index(black_pieces[i])
         if black_pieces[i] == 'pawn':
@@ -106,6 +123,7 @@ def draw_pieces():
             if selection == i:
                 pygame.draw.rect(screen, 'blue', [black_locations[i][0] * 100 + 1, black_locations[i][1] * 100 + 1,
                                                   100, 100], 2)
+
 
 def check_options(pieces, locations, turn):
     moves_list = []
@@ -127,6 +145,7 @@ def check_options(pieces, locations, turn):
             moves_list = check_king(location, turn)
         all_moves_list.append(moves_list)
     return all_moves_list
+
 def check_king(position, color):
     moves_list = []
     if color == 'white':
@@ -152,61 +171,27 @@ def check_queen(position, color):
 
 def check_bishop(position, color):
     moves_list = []
-    if color == "white":
-        enemies_list = black_locations
-        friends_list = white_locations
-    else:
-        friends_list = black_locations
-        enemies_list = white_locations
-    for i in range(4):
-        path =  True
-        chain = 1
-        if i == 0:
-            x = 1
-            y = -1
-        elif i==1:
-            x = -1
-            y = -1
-        elif i ==2:
-            x = 1
-            y = 1
-        else:
-            x = -1
-            y = -1
-        while path:
-            if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and \
-                    0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7:
-                moves_list.append((position[0] + (chain * x), position[1] + (chain * y)))
-                if (position[0] + (chain * x), position[1] + (chain * y)) in enemies_list:
-                    path = False
-                chain += 1
-            else:
-                path = False
-    return moves_list
-
-def check_rook(position, color):
-    moves_list = []
     if color == 'white':
         enemies_list = black_locations
         friends_list = white_locations
     else:
         friends_list = black_locations
         enemies_list = white_locations
-    for i in range(4): 
+    for i in range(4):  
         path = True
         chain = 1
         if i == 0:
-            x = 0
-            y = 1
+            x = 1
+            y = -1
         elif i == 1:
-            x = 0
+            x = -1
             y = -1
         elif i == 2:
             x = 1
-            y = 0
+            y = 1
         else:
             x = -1
-            y = 0
+            y = 1
         while path:
             if (position[0] + (chain * x), position[1] + (chain * y)) not in friends_list and \
                     0 <= position[0] + (chain * x) <= 7 and 0 <= position[1] + (chain * y) <= 7:
@@ -278,6 +263,7 @@ def check_pawn(position, color):
         if (position[0] - 1, position[1] - 1) in white_locations:
             moves_list.append((position[0] - 1, position[1] - 1))
     return moves_list
+
 def check_knight(position, color):
     moves_list = []
     if color == 'white':
@@ -302,11 +288,14 @@ def check_valid_moves():
     valid_options = options_list[selection]
     return valid_options
 
-def draw_valid():
-    if turn_step <2:
-        option_list = white_options
+def draw_valid(moves):
+    if turn_step < 2:
+        color = 'red'
     else:
-        option_list = black_options
+        color = 'blue'
+    for i in range(len(moves)):
+        pygame.draw.circle(screen, color, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
+
 def draw_captured():
     for i in range(len(captured_pieces_white)):
         captured_piece = captured_pieces_white[i]
@@ -337,10 +326,13 @@ def draw_check():
                         pygame.draw.rect(screen, 'dark blue', [black_locations[king_index][0] * 100 + 1,
                                                                black_locations[king_index][1] * 100 + 1, 100, 100], 5)
 
+
 def draw_game_over():
     pygame.draw.rect(screen, 'black', [200, 200, 400, 70])
     screen.blit(font.render(f'{winner} won the game!', True, 'white'), (210, 210))
     screen.blit(font.render(f'Press ENTER to Restart!', True, 'white'), (210, 240))
+
+    
 
 black_options = check_options(black_pieces, black_locations, 'black')
 white_options = check_options(white_pieces, white_locations, 'white')
@@ -428,6 +420,7 @@ while run:
                 valid_moves = []
                 black_options = check_options(black_pieces, black_locations, 'black')
                 white_options = check_options(white_pieces, white_locations, 'white')
+                
 
     if winner != '':
         game_over = True
